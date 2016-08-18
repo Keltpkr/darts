@@ -1,0 +1,13 @@
+<script>
+    var obj = {
+    w: 123,
+    x: {
+        y: 456,
+        z: 789
+    }
+};
+var copy = Object.create(obj);
+copy.w = 321;
+copy.x.y = 654;
+console.log(obj);
+</script>
