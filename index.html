@@ -53,9 +53,11 @@
       {
       background-image:url(images/etat1.png);
       background-repeat: no-repeat;
-      height:70px;
+      height:80%;
+      width:100%;
+      background-size: contain;
       cursor:pointer;
-      background-position: center center;
+      background-position: center;
       }
     .nomjoueurs
       {
@@ -129,7 +131,6 @@
     .table_choix2
       {
 	  color:white;
-      TEXT-DECORATION:underline;
       cursor:pointer;
       visibility: hidden;
       border-collapse: collapse;
@@ -190,7 +191,6 @@
 	// Classe Signe
 	signe = function (dom_parent,joueur,ligne){
 
-
 	  this.ligne = ligne;
 	  this.joueur = joueur;
 	  this.etat = 0;
@@ -210,40 +210,51 @@
 
 		switch (this.etat) {
 		  case 0:
-			var newImage = "url(images/etat1.png)";
+			var newImage = "url(images/etat1bis.png)";
 			this.image.style.backgroundImage = newImage;
 			this.image.onclick = function(){actionne_case(this.composant)};
+			this.image.style.opacity = "1";
 		  break;
 		  case 1:
-			var newImage = "url(images/etat2.png)";
+			var newImage = "url(images/etat2bis.png)";
 			this.image.style.backgroundImage = newImage;
 			this.image.onclick = function(){actionne_case(this.composant)};
+			this.image.style.opacity = "1";
 		  break;
 		  case 2:
-			var newImage = "url(images/etat3.png)";
+			var newImage = "url(images/etat3bis.png)";
 			this.image.style.backgroundImage = newImage;
 			this.image.onclick = function(){actionne_case(this.composant)};
+			this.image.style.opacity = "1";
 		  break;
 		  case 3:
-			var newImage = "url(images/etat4.png)";
+			var newImage = "url(images/etat4bis.png)";
 			this.image.style.backgroundImage = newImage;
 			this.image.onclick = function(){actionne_case(this.composant)};
+			this.image.style.opacity = "1";
 		  break;
 		  case 4:
-			var newImage = "url(images/etat5.png)";
+			var newImage = "url(images/etat4bis.png)";
 			this.image.style.backgroundImage = newImage;
+			this.image.style.opacity = "0.35";
 			this.image.onclick = '';
 			
 		  break;
 		}
 	  }
+	  this.disable = function() {
+		this.image.onclick = null;
+	  }
+	  this.enable = function() {
+		this.image.onclick = function(){actionne_case(this.composant)};
+	  }
 	}
 	grille = function (nbJoueurs){
 		this.nbj = nbJoueurs;
-		//this.labels = ['','20','19','18','17','16','15','Bull','Score'];
-		//this.labels2 = ['nomjoueur','20','19','18','17','16','15','25','score'];
-		this.labels = ['','20','Bull','Score'];
-		this.labels2 = ['nomjoueur','20','25','score'];
+		this.labels = ['','20','19','18','17','16','15','Bull','Score'];
+		this.labels2 = ['nomjoueur','20','19','18','17','16','15','25','score'];
+		//this.labels = ['','20','Bull','Score'];
+		//this.labels2 = ['nomjoueur','20','25','score'];
 		this.build = function (elemt_parent){
 			var table_generale  = document.createElement('table');
 			var corps_table_generale = document.createElement('tbody');
@@ -317,6 +328,9 @@
 		}
 	}
 	function start(){
+	    if(!responsiveVoice.voiceSupport()) {
+            alert('Voice not supported');
+        }
 		flag = false;
 		tripe_flag = false;
 		double_flag = false;
@@ -396,6 +410,7 @@
 		}
 		if (col_filled(obj)){
 			audio_stack.push(nameaudio + ", gagne la partie");
+		    disableall();
 			var d = new Date();
 			var now = d.getTime();
 			var duree_m = Math.round((now-time)/1000/60);
@@ -548,5 +563,12 @@
 				libelle_cel[line+1][i].disable(); 
 			}			
 		}
+    }
+    function disableall(){
+		for(var i_player=0;i_player<case_joueur[1].length;i_player++){
+			 for(var i_ligne=0;i_ligne<case_joueur.length-1;i_ligne++){
+				case_joueur[i_ligne+1][i_player].disable();
+			 }
+		}    	
     }
 </script>
