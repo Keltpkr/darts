@@ -51,7 +51,7 @@
       }
     .image
       {
-      background-image:url(images/etat1.png);
+
       background-repeat: no-repeat;
       height:80%;
       width:100%;
@@ -119,9 +119,19 @@
       width:150px;
       height:100px;      
       }
-    .cl_div_enlever
+    .undo
       {
-
+      width:98%;
+      height:5%;
+      background-color: #331a00;
+      font-size: 150%;
+      border-radius: 12px;
+      margin:5px;
+      color:white;
+      }
+      .undo:disabled
+      {
+      color:black;
       }
     .table_choix
       {
@@ -143,23 +153,23 @@
   <body onload ="start()" id="body" style="background-color: black;">
 	
     <div style="position:absolute;display:none;">
-      <img src="images/etat1.png"/>
-      <img src="images/etat2.png"/>
-      <img src="images/etat3.png"/>
-      <img src="images/etat4.png"/>
-      <img src="images/etat5.png"/>
+      <img src="images/etat1bis.png"/>
+      <img src="images/etat2bis.png"/>
+      <img src="images/etat3bis.png"/>
+      <img src="images/etat4bis.png"/>
     </div>
     <!-- sons -->
     <audio id="audio" src="" >Veuillez mettre à jour votre navigateur !</audio>
     <!-- Table -->
     <div id='darts'></div>
 
-    <input type="button" id="undo" disabled onclick="undo_last()" value="Undo"/>
+    <input type="button" id="undo" disabled onclick="undo_last()" class="undo" value="Undo"/>
 
 
   </body>
   <script src='https://code.responsivevoice.org/responsivevoice.js'></script>
     <script type="text/javascript">
+	document.onkeydown = applyKey;
 	var nomjoueurs = [];
 	var audio_stack = [];
 	var undo = [];
@@ -522,7 +532,7 @@
                 }
             }
 	    } else {
-            for(var i_joueur=0;i_joueur<case_joueur.length-1;i_joueur++){
+            for(var i_joueur=0;i_joueur<case_joueur[1].length;i_joueur++){
                 for(var i_ligne=0;i_ligne<undo.length;i_ligne++){
                     case_joueur[i_ligne+1][i_joueur].etat = 0;
                     case_joueur[i_ligne+1][i_joueur].change_etat();
@@ -571,4 +581,36 @@
 			 }
 		}    	
     }
+function applyKey (_event_){
+	
+	// --- Retrieve event object from current web explorer
+	var winObj = checkEventObj(_event_);
+	
+	var intKeyCode = winObj.keyCode;
+	var intAltKey = winObj.altKey;
+	var intCtrlKey = winObj.ctrlKey;
+		
+	// 1° --- Access with [ALT/CTRL+Key]
+	if (intAltKey || intCtrlKey) {
+		
+		if ( intKeyCode == 90 ){
+			
+			undo_last();
+			
+			// 3° --- Map the keyCode in another keyCode not used
+			winObj.keyCode = intKeyCode = 5019;
+			winObj.returnValue = false;
+			return false;
+		}
+		
+	}
+}
+function checkEventObj ( _event_ ){
+	// --- IE explorer
+	if ( window.event )
+		return window.event;
+	// --- Netscape and other explorers
+	else
+		return _event_;
+}
 </script>
