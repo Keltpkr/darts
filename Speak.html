@@ -1,0 +1,8 @@
+<script type="text/javascript">
+var msg = new SpeechSynthesisUtterance("Je suis une chèvre");
+msg.onend = function(e) {
+  alert('Finished in ' + event.elapsedTime + ' seconds.');
+};
+
+window.speechSynthesis.speak(msg);
+</script>

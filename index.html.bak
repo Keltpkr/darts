@@ -1,0 +1,715 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="generator" content="PSPad editor, www.pspad.com">
+
+  <title>Flechettes</title>
+  <style>
+    .table_generale
+      {
+      background-image:url(images/fond.png);
+      background-repeat: no-repeat;
+      background-size: cover;
+	  color: red;
+	  width : 99%;
+	  height :95%;
+      }
+    .joueur
+      {
+      color: white;
+      border:solid white 1px;
+      text-align: center;
+      }
+    .joueur3
+      {
+      color: white;
+      border:solid white 1px;
+      text-align: center;
+      width: 110px;
+      height: 70px;
+      }
+    .lib
+      {
+      color: white;
+      border:solid white 1px;
+      text-align : center;
+      width: 80px;
+      height: 70px;
+      font-size: xx-large;
+      }
+    .lib2
+      {
+      color: white;
+      border:solid white 1px;
+      background-color:black;
+      text-align : center;
+      width: 80px;
+      height: 52px;
+      font-size: xx-large;
+      background:none;
+      }
+    .image
+      {
+
+      background-repeat: no-repeat;
+      height:80%;
+      width:100%;
+      background-size: contain;
+      cursor:pointer;
+      background-position: center;
+      }
+    .nomjoueurs
+      {
+      font-size: x-large;
+      color:white;
+	  text-align : center;
+      background:none;
+      border:none;
+      width:180;
+      }
+    .scores
+      {
+      font-size: x-large;
+      color:white;
+      border:none;
+      width:180;
+	  background:none;
+	  text-align:center;
+      }
+    .nomjoueurs3
+      {
+      font-size: x-large;
+      color:white;
+      background:black;
+      border:none;
+      width:100;
+      }
+    .scores3
+      {
+      font-size: x-large;
+      color:white;
+      border:none;
+      width:100;
+	  background:none;
+	  text-align:center;
+      }
+    .cl_div_bed
+      {
+      visibility:hidden;
+      border:solid white 0px;
+      position:absolute;
+      top: 300px;
+      left:550px;
+      }
+    .cl_txt_bed
+      {
+      border:none;
+      background-color: black;
+      width:200px;
+      height:100px;
+      font-size:50px;
+      color:green;
+      }
+    .btn_bed
+      {
+      position: relative;
+      top:50;
+      font-size:25px;
+      width:150px;
+      height:100px;      
+      }
+    .undo
+      {
+      width:98%;
+      height:5%;
+      background-color: #997300;
+      font-size: 150%;
+      border-radius: 12px;
+      border-color:black;
+      margin:5px;
+      color:white;
+      }
+      .undo:disabled
+      {
+      color:black;
+      }
+    .table_choix
+      {
+      TEXT-DECORATION:none;
+      cursor:pointer;
+      }
+    .table_choix2
+      {
+	  color:white;
+      cursor:pointer;
+      visibility: hidden;
+      border-collapse: collapse;
+      position:absolute;
+      top:8px;
+      right:0px;
+      }      
+  </style>
+  </head>
+  <body onload ="start()" id="body" style="background-color: black;">
+	
+    <div style="position:absolute;display:none;">
+      <img src="images/etat1bis.png"/>
+      <img src="images/etat2bis.png"/>
+      <img src="images/etat3bis.png"/>
+      <img src="images/etat4bis.png"/>
+    </div>
+    <!-- sons -->
+    <audio id="audio" src="" >Veuillez mettre à jour votre navigateur !</audio>
+    <!-- Table -->
+    <div id='darts'></div>
+
+    <input type="button" id="undo" disabled onclick="undo_last()" class="undo" value="Undo"/>
+
+
+  </body>
+  <script src='lib/strings_utils.js'></script>
+  <script src='https://code.responsivevoice.org/responsivevoice.js'></script>
+  <script type="text/javascript">
+  	var textes = {
+  		'score': {
+  				'fr':'### scores ### points',
+  				'uk':'### scores ### points'
+  		},
+   		'open': {
+  				'fr':'### ouvre le ###',
+  				'uk':'### opens ###'
+  		},
+    	'close': {
+  				'fr':'### ferme le ###',
+  				'uk':'### close ###'
+  		},
+   		'winner': {
+  				'fr':'### gagne la partie',
+  				'uk':'### winner'
+  		},
+   		'time': {
+  				'fr':'La partie à duré ### minutes et ### secondes',
+  				'uk':'The lasted ### and ### minutes'
+  		}
+  	}
+  	var country = 'fr';
+  	var array = ['toto'];
+  	// console.log(replacepatern('###','###  gagne la partie',array));
+  	
+		document.onkeydown = applyKey;
+		var nomjoueurs = [];
+		var audio_stack = [];
+		var undo = [];
+		var time = 0;
+		var grille1={};
+		var case_joueur = new Array();
+		var libelle_cel = new Array();
+		var speechoptions = {	
+		            pitch: 0.9,
+								rate:1.1,
+								volume:1
+							};
+		playsounds();
+		var language = '';
+		// Classe label
+		var label = function (dom_parent,indice,label){
+	
+		  this.ligne = indice;
+		  this.dom_parent = dom_parent;
+		  this.label = label;
+	
+		  this.image = document.createElement('div');
+		  // Relie le composant au noeud Div
+		  this.image.composant = this;
+		  this.image.id = "label_" + this.ligne;
+		  this.image.innerHTML = this.label;
+		  this.dom_parent.appendChild(this.image);
+		  
+	
+		  this.disable = function() {
+			this.image.setAttribute("style","color:#2B2B2B;");
+		  }
+		  this.enable = function() {
+			this.image.setAttribute("style","color:white;");
+		  }
+		}
+		// Classe Signe
+		var signe = function (dom_parent,joueur,ligne){
+	
+		  this.ligne = ligne;
+		  this.joueur = joueur;
+		  this.etat = 0;
+		  this.dom_parent = dom_parent;
+		  this.image = document.createElement('div');
+		  // Relie le composant au noeud Div
+		  this.image.composant = this;
+		  this.image.id = "signe_" + ligne + "_" + joueur;
+	
+		  this.image.setAttribute("class","image");
+		  this.image.setAttribute("className","image");
+		  
+		  this.image.onclick = function(){actionne_case(this.composant)};
+	
+		  this.dom_parent.appendChild(this.image);
+		  this.change_etat = function() {
+	
+			switch (this.etat) {
+			  case 0:
+				var newImage = "url(images/etat1bis.png)";
+				this.image.style.backgroundImage = newImage;
+				this.image.onclick = function(){actionne_case(this.composant)};
+				this.image.style.opacity = "1";
+			  break;
+			  case 1:
+				var newImage = "url(images/etat2bis.png)";
+				this.image.style.backgroundImage = newImage;
+				this.image.onclick = function(){actionne_case(this.composant)};
+				this.image.style.opacity = "1";
+			  break;
+			  case 2:
+				var newImage = "url(images/etat3bis.png)";
+				this.image.style.backgroundImage = newImage;
+				this.image.onclick = function(){actionne_case(this.composant)};
+				this.image.style.opacity = "1";
+			  break;
+			  case 3:
+				var newImage = "url(images/etat4bis.png)";
+				this.image.style.backgroundImage = newImage;
+				this.image.onclick = function(){actionne_case(this.composant)};
+				this.image.style.opacity = "1";
+			  break;
+			  case 4:
+				var newImage = "url(images/etat4bis.png)";
+				this.image.style.backgroundImage = newImage;
+				this.image.style.opacity = "0.35";
+				this.image.onclick = '';
+				
+			  break;
+			}
+		  }
+		  this.disable = function() {
+			this.image.onclick = null;
+		  }
+		  this.enable = function() {
+			this.image.onclick = function(){actionne_case(this.composant)};
+		  }
+		}
+		var grille = function (nbJoueurs){
+			this.nbj = nbJoueurs;
+			this.labels = ['','20','19','18','17','16','15','Bull','Score'];
+			this.labels2 = ['nomjoueur','20','19','18','17','16','15','25','score'];
+			//this.labels = ['','20','Bull','Score'];
+			//this.labels2 = ['nomjoueur','20','25','score'];
+			this.build = function (elemt_parent){
+				var table_generale  = document.createElement('table');
+				var corps_table_generale = document.createElement('tbody');
+				table_generale.id = "table_generale";
+				// enlever les espaces entres les cellules du tableau
+				table_generale.style.borderCollapse = "collapse";
+				table_generale.setAttribute("class","table_generale");
+				table_generale.setAttribute("className","table_generale");
+	
+				for (var i=0;i<this.labels.length;i++){
+					var ligne = new Array;
+					ligne[i] = document.createElement('tr');
+					ligne[i].id = this.labels[i];
+					if (i>0 && i<this.labels.length - 1){
+						libelle_cel[i] = new Array();
+						case_joueur[i] = new Array();
+					}
+					for(var no_joueur=0;no_joueur< this.nbj;no_joueur++){
+						var cellule_joueur = document.createElement('td');
+						if (i>0 && i<this.labels.length - 1){
+							case_joueur[i][no_joueur] = new signe(cellule_joueur,no_joueur,i);
+						} else {
+							// Ligne nom des joueurs
+							if (grille1.labels2[i] === 'nomjoueur'){
+								var nom1  = document.createElement('input');
+								nom1.setAttribute("type","text");
+								nom1.setAttribute("value",nomjoueurs[no_joueur]);
+								nom1.setAttribute("class","nomjoueurs");
+								nom1.setAttribute("className","nomjoueurs");
+								nom1.id = "joueur" + no_joueur;
+								nom1.setAttribute("onblur","sauvegardenom(this.id,this.value)");
+								nom1.setAttribute("ondblclick","selectionne(this)");
+								cellule_joueur.appendChild(nom1);
+							}
+							// Ligne des scores
+							if (grille1.labels2[i] === 'score'){
+								var score  = document.createElement('input');
+								score.setAttribute("type","text");
+								score.setAttribute("value","0");
+								score.setAttribute("id","score" + no_joueur);
+								score.setAttribute("name","score");
+								score.setAttribute("class","scores");
+								score.setAttribute("className","scores");
+								score.innerHTML = 0;
+								cellule_joueur.appendChild(score);
+							}
+						}
+						cellule_joueur.setAttribute("class","joueur");
+						cellule_joueur.setAttribute("className","joueur");
+						ligne[i].appendChild(cellule_joueur);      
+	
+						if (no_joueur < this.nbj-1){
+							// Construit le tableau de zones de libéllés des scores
+							var cellule_lib  = document.createElement('td');
+							cellule_lib.setAttribute("class","lib2");
+							cellule_lib.setAttribute("className","lib2");
+							if (i>0 && i<this.labels.length - 1){
+								libelle_cel[i][no_joueur] = new label(cellule_lib,i,this.labels[i])
+								libelle_cel[i][no_joueur].image.setAttribute("class","table_choix");
+								libelle_cel[i][no_joueur].image.setAttribute("className","table_choix");
+							}
+							ligne[i].appendChild(cellule_lib);
+						}
+						corps_table_generale.appendChild(ligne[i]);
+					}
+				}
+				table_generale.appendChild(corps_table_generale);
+				document.getElementById('darts').appendChild(table_generale);
+			}
+		}
+		function start(){
+	
+			var flag = false;
+			var tripe_flag = false;
+			var double_flag = false;
+			var bed_flag = false;
+			var d = new Date();
+			time = d.getTime();
+	
+			var nb_joueur = $_GET("joueur");
+			if(nb_joueur<2)
+				nb_joueur = 2;
+			
+			for(var i=0;i<nb_joueur;i++){
+				var no_joueur = i + 1
+				var joueur = getCook("joueur" + i);
+				if (joueur.length == 0)
+					nomjoueurs[i] = "joueur " + no_joueur;
+				else
+					nomjoueurs[i] = joueur;
+			}
+			var urlparameter = $_GET("language");
+	    language =decodeURIComponent(urlparameter);
+			language = getlanguage(language);
+
+			grille1 = new grille(parseInt(nb_joueur));
+	
+			var lebody = document.getElementById("body");
+			grille1.build(lebody);
+		}
+		function actionne_case(obj){
+			var nameaudio = document.getElementById("joueur" + obj.joueur).value;
+			var numero = 21 - obj.ligne;
+			var soundpath = '' + numero + '';
+			if (grille1.labels[obj.ligne] === 'Bull')
+				var soundpath = 'Bull\'s eye';	
+			//audio_stack.push(soundpath);
+			responsiveVoice.speak(soundpath,language,speechoptions);
+	
+			if (obj.etat == 3){
+				var flag = false;
+				for(var i_player=0;i_player<case_joueur[1].length;i_player++){
+					if(case_joueur[obj.ligne][obj.joueur].etat==3 &&  case_joueur[obj.ligne][i_player].etat < 3){
+						document.getElementById("score"+ i_player).value = parseInt(document.getElementById("score"+ i_player).value) + parseInt(grille1.labels2[obj.ligne]);
+						if(!flag)
+							flag = true;
+					}
+				}
+			}
+			if(flag){
+				var array = [];
+				array.push(nameaudio);
+				array.push(grille1.labels2[obj.ligne]);
+				audio_stack.push(replacepatern('###',textes.score[country],array));
+				
+			}
+			var flag = false;
+			for(var i_player=0;i_player<case_joueur[1].length;i_player++){
+				if(i_player!=obj.joueur){
+					var etat_joueur = case_joueur[obj.ligne][obj.joueur].etat;
+					var etat_joueur_oppose = case_joueur[obj.ligne][i_player].etat;
+					if(etat_joueur>1 &&  etat_joueur_oppose < 3){
+						flag = true;
+						break;
+					}
+				}
+			}
+			if (obj.etat < 3){
+				obj.etat++;
+				obj.change_etat();
+				if (obj.etat == 3 && flag) {
+					var array = [];
+					array.push(nameaudio);
+					array.push(grille1.labels[obj.ligne]);
+					audio_stack.push(replacepatern('###',textes.open[country],array));
+				}
+			}
+			if (obj.etat == 3 && !flag){
+				var array = [];
+				array.push(nameaudio);
+				array.push(grille1.labels2[obj.ligne]);
+				audio_stack.push(replacepatern('###',textes.close[country],array));
+
+				for(var i_player=0;i_player<case_joueur[1].length;i_player++){
+					case_joueur[obj.ligne][i_player].etat = 4;
+					case_joueur[obj.ligne][i_player].change_etat();
+				}
+				for(var i= 0;i<libelle_cel[obj.ligne].length;i++){
+					libelle_cel[obj.ligne][i].disable();  
+				}
+				obj.change_etat();    
+			}
+			if (col_filled(obj)){
+				var array = [];
+				array.push(nameaudio);
+				audio_stack.push(replacepatern('###',textes.winner[country],array));
+			  disableall();
+				var d = new Date();
+				var now = d.getTime();
+				var duree_m = Math.floor((now-time)/1000/60);
+				var duree_s = Math.floor((now-time - (duree_m * 60 * 1000))/1000);
+				var array = [];
+				array.push(duree_m);
+				array.push(duree_s);
+				audio_stack.push(replacepatern('###',textes.time[country],array));
+			}
+			saveundo();
+		}
+		function toggle_check()
+		{
+		if (document.getElementById("chk_enlever").checked==true)
+		  document.getElementById("chk_enlever").checked = false;
+		else
+		  document.getElementById("chk_enlever").checked = true;
+		}
+		// Ecrire un coockie 
+		function setCook2(nom,valeur,jours) 
+		  {
+		  var expDate = new Date()
+		  expDate.setTime(expDate.getTime() + (jours * 24 * 3600 * 1000))
+		  var cookie = nom + "=" + escape(valeur)
+			  + ";expires=" + expDate.toGMTString();
+		  document.cookie = cookie;
+		  }
+		// Lire un coockie
+		function getCook(nom) 
+		  {
+		  var deb = document.cookie.indexOf(nom + "=")
+		  if (deb >= 0) {
+			  deb += nom.length + 1
+			  var fin = document.cookie.indexOf(";",deb)
+			  if (fin < 0) fin = document.cookie.length
+			  return unescape(document.cookie.substring(deb,fin))
+			  }
+		  return ""
+		  }
+		function sauvegardenom(coockie,valeur)
+		  {
+		  setCook2(coockie,valeur,365)
+		  }
+		function col_filled(obj){
+			var flag_casefilled = false;
+			for (var i= 1;i<case_joueur.length;i++){
+				if (case_joueur[i][obj.joueur].etat < 3) {
+					flag_casefilled = true;
+					break;
+				}
+			}
+			if (flag_casefilled == false) {
+				var flag_scorelower = true;
+				for (i=0;i<case_joueur[1].length;i++){
+					if (Number(document.getElementById("score" + obj.joueur).value) > Number(document.getElementById("score" + i).value)){
+						flag_scorelower = false;
+						break;
+					}
+				}
+			}
+			return(flag_scorelower);
+		}
+		function ia_play(){
+		}
+		function $_GET(param) {
+			var vars = {};
+			window.location.href.replace( location.hash, '' ).replace( 
+				/[?&]+([^=&]+)=?([^&]*)?/gi, // regexp
+				function( m, key, value ) { // callback
+					vars[key] = value !== undefined ? value : '';
+				}
+			);
+	
+			if ( param ) {
+				return vars[param] ? vars[param] : null;	
+			}
+			return vars;
+		}
+		function selectionne(text_input){
+			text_input.select();
+		}
+		function playsounds(){
+			if(audio_stack.length>0){
+				if(!responsiveVoice.isPlaying()){
+					responsiveVoice.speak(audio_stack[0],language,speechoptions);
+					//alert(audio_stack[0] +  ',' + language);
+					audio_stack.shift();
+				}
+			}
+			
+			setTimeout(function(){playsounds()},500);
+		}
+		function undo_last() {
+		    if(undo.length > 1) {
+	    	    undo.pop();
+	            for(var i_joueur=0;i_joueur<undo[undo.length-1].length;i_joueur++){
+	                var dernier_element = undo.length-1;
+	                var nb_lignes =undo[dernier_element][i_joueur].length-1;
+	                for(var i_ligne=0;i_ligne<undo.length;i_ligne++){
+	                    if (i_ligne < nb_lignes)
+	                    	{
+	                        case_joueur[i_ligne+1][i_joueur].etat = undo[undo.length-1][i_joueur][i_ligne];
+	                        case_joueur[i_ligne+1][i_joueur].change_etat();
+	                        checkiflineclosed(i_ligne);
+	                    	}
+	                    document.getElementsByName("score")[i_joueur].value = undo[undo.length-1][i_joueur][undo[undo.length-1][i_joueur].length-1]
+	                }
+	            }
+		    } else {
+	            for(var i_joueur=0;i_joueur<case_joueur[1].length;i_joueur++){
+	                for(var i_ligne=0;i_ligne<undo.length;i_ligne++){
+	                    case_joueur[i_ligne+1][i_joueur].etat = 0;
+	                    case_joueur[i_ligne+1][i_joueur].change_etat();
+	                    document.getElementsByName("score")[i_joueur].value = 0;
+	                }
+	            }
+	            document.getElementById("undo").disabled  = true;
+		    }
+	        
+		}
+	  function saveundo(){
+			var temp_cases = [];
+			for (var i_joueur=0;i_joueur<case_joueur[1].length;i_joueur++){
+				var valeur = document.getElementsByName("score")[i_joueur].value;
+				temp_cases[i_joueur] = [];
+				for (var i_ligne=0;i_ligne<case_joueur.length-1;i_ligne++){
+					temp_cases[i_joueur][i_ligne] = case_joueur[i_ligne+1][i_joueur].etat;
+				}
+				temp_cases[i_joueur].push(valeur)
+			}
+			undo.push(temp_cases);
+			document.getElementById("undo").disabled  = false;
+	    }
+	    function checkiflineclosed(line) {
+	    	var flag = false;
+			for(var i_player=0;i_player<case_joueur[1].length;i_player++){
+				if(case_joueur[line+1][i_player].etat < 4){
+					flag = true;
+					break;
+				} 
+			}
+			if (flag){
+				for(var i= 0;i<libelle_cel[line+1].length;i++){
+					libelle_cel[line+1][i].enable();  
+				}			
+			 }	else {
+				for(var i= 0;i<libelle_cel[line+1].length;i++){
+					libelle_cel[line+1][i].disable(); 
+				}			
+			}
+	    }
+	    function disableall(){
+			for(var i_player=0;i_player<case_joueur[1].length;i_player++){
+				 for(var i_ligne=0;i_ligne<case_joueur.length-1;i_ligne++){
+					case_joueur[i_ligne+1][i_player].disable();
+				 }
+			}    	
+	    }
+	function applyKey (_event_){
+		
+		// --- Retrieve event object from current web explorer
+		var winObj = checkEventObj(_event_);
+		
+		var intKeyCode = winObj.keyCode;
+		var intAltKey = winObj.altKey;
+		var intCtrlKey = winObj.ctrlKey;
+	
+		if ( intKeyCode == 96 )
+			document.getElementById("signe_1_1").click();
+		if ( intKeyCode == 105 )
+			document.getElementById("signe_2_1").click();
+		if ( intKeyCode == 104 )
+			document.getElementById("signe_3_1").click();
+		if ( intKeyCode == 103 )
+			document.getElementById("signe_4_1").click();	
+		if ( intKeyCode == 102 )
+			document.getElementById("signe_5_1").click();	
+		if ( intKeyCode == 101 )
+			document.getElementById("signe_6_1").click();	
+		if ( intKeyCode == 100 )
+			document.getElementById("signe_7_1").click();	
+			
+		if ( intKeyCode == 48 )
+			document.getElementById("signe_1_0").click();
+		if ( intKeyCode == 57 )
+			document.getElementById("signe_2_0").click();
+		if ( intKeyCode == 56 )
+			document.getElementById("signe_3_0").click();
+		if ( intKeyCode == 55 )
+			document.getElementById("signe_4_0").click();	
+		if ( intKeyCode == 54 )
+			document.getElementById("signe_5_0").click();	
+		if ( intKeyCode == 53 )
+			document.getElementById("signe_6_0").click();	
+		if ( intKeyCode == 52 )
+			document.getElementById("signe_7_0").click();	
+			
+		// 1° --- Access with [ALT/CTRL+Key]
+		if (intAltKey || intCtrlKey) {
+			
+			if ( intKeyCode == 90 ){
+				
+				undo_last();
+				
+				// 3° --- Map the keyCode in another keyCode not used
+				winObj.keyCode = intKeyCode = 5019;
+				winObj.returnValue = false;
+				return false;
+			}
+	
+		}
+	}
+	function checkEventObj ( _event_ ){
+		// --- IE explorer
+		if ( window.event )
+			return window.event;
+		// --- Netscape and other explorers
+		else
+			return _event_;
+	}
+	function getlanguage(language) {
+		var voicelist = responsiveVoice.getVoices();
+		var index = findIndexinarrayOfObj(voicelist,language);
+		if (index == -1){
+		    country = 'uk';
+			return 'UK English Female';
+		}
+		country = 'fr';
+		return voicelist[index].name;
+	}
+	function findIndexinarrayOfObj(myArray,searchString){
+	  var found = -1;
+	  for(var i=0;i<myArray.length;i++){
+	      for (var key in myArray[i]){
+	          if (myArray[i][key] == searchString){
+	              found = i;
+	              break;
+	          }
+	          if (found > -1)
+	              break;
+	      }
+	  }
+    return found;
+  }
+</script>
